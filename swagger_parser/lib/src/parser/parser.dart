@@ -135,7 +135,15 @@ class OpenApiParser {
       }
       final types = <UniversalRequestType>[];
       if (map.containsKey(_parametersVar)) {
-        for (final rawParameter in map[_parametersVar] as List<dynamic>) {
+        for (var rawParameter in map[_parametersVar] as List<dynamic>) {
+          if (rawParameter.containsKey(_refVar)) {
+            List<String> refKeys = rawParameter[_refVar].toString().split('/').sublist(1);
+            var tempDefine = _definitionFileContent;
+            for(var key in refKeys){
+              tempDefine = tempDefine[key];
+            }
+            rawParameter = tempDefine;
+          }
           final isRequired =
               (rawParameter as Map<String, dynamic>)[_requiredVar]
                   ?.toString()
@@ -323,12 +331,22 @@ class OpenApiParser {
 
     (_definitionFileContent[_pathsVar] as Map<String, dynamic>)
         .forEach((path, pathValue) {
-      (pathValue as Map<String, dynamic>).forEach((key, requestPath) {
+      var pathValueMap = pathValue as Map<String, dynamic>;
+      var pathParameters = [];
+      if (pathValueMap.containsKey(_parametersVar)) {
+        pathParameters = pathValueMap[_parametersVar];
+        pathValueMap.remove(_parametersVar);
+      }
+      pathValueMap.forEach((key, requestPath) {
         // `servers` contains List<dynamic>
         if (key == _serversVar) {
           return;
         }
-
+        if (requestPath.containsKey(_parametersVar)) {
+          requestPath[_parametersVar] = []..addAll(requestPath[_parametersVar])..addAll(pathParameters);
+        } else {
+          requestPath[_parametersVar] = pathParameters;
+        }
         final requestPathResponses = (requestPath
             as Map<String, dynamic>)[_responsesVar] as Map<String, dynamic>;
         final returnType = _version == OpenApiVersion.v2
