@@ -576,7 +576,7 @@ class OpenApiParser {
     Map<String, dynamic> map, {
     String? name,
     String? arrayName,
-    bool isRequired = true,
+    bool isRequired = false,
     bool useSchema = false,
     bool allOfObject = false,
     bool root = true,
