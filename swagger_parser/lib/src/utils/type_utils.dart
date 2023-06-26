@@ -15,7 +15,7 @@ extension StringTypeX on String {
       case 'string':
         switch (format) {
           case 'binary':
-            return 'File';
+            return 'List<int>';
           case 'date':
           case 'date-time':
             return 'DateTime';
